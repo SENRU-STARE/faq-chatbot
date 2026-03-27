@@ -1,18 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, User, Bot, X, MessageSquare, Loader2 } from 'lucide-react';
+import { Send, User, Bot, Loader2, Sparkles, Paperclip, Globe, Image as ImageIcon } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import { Message } from '../types';
 import { getChatResponse } from '../services/gemini';
 import { cn } from '../lib/utils';
 
 export function ChatInterface() {
-  const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     {
       id: '1',
       role: 'assistant',
-      content: "Hello! I'm Starebot, your InsightFlow assistant. How can I help you today?",
+      content: "Hello! I'm Starebot. How can I help you today?",
       timestamp: new Date(),
     },
   ]);
@@ -59,112 +58,99 @@ export function ChatInterface() {
   };
 
   return (
-    <>
-      {/* Floating Button */}
-      <motion.button
-        whileHover={{ scale: 1.05 }}
-        whileTap={{ scale: 0.95 }}
-        onClick={() => setIsOpen(true)}
-        className={cn(
-          "fixed bottom-6 right-6 w-14 h-14 rounded-full bg-black text-white flex items-center justify-center shadow-2xl z-50 transition-all duration-300",
-          isOpen && "scale-0 opacity-0"
-        )}
-      >
-        <MessageSquare className="w-6 h-6" />
-      </motion.button>
-
-      {/* Chat Window */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            className="fixed bottom-6 right-6 w-[400px] h-[600px] bg-white rounded-3xl shadow-2xl flex flex-col overflow-hidden z-50 border border-gray-100"
-          >
-            {/* Header */}
-            <div className="p-4 bg-black text-white flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
-                  <Bot className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm">Starebot</h3>
-                  <p className="text-[10px] text-white/60 uppercase tracking-widest">Always Online</p>
-                </div>
-              </div>
-              <button onClick={() => setIsOpen(false)} className="hover:bg-white/10 p-2 rounded-full transition-colors">
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {/* Messages */}
-            <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50/50">
-              {messages.map((msg) => (
-                <motion.div
-                  key={msg.id}
-                  initial={{ opacity: 0, x: msg.role === 'user' ? 10 : -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  className={cn(
-                    "flex gap-3 max-w-[85%]",
-                    msg.role === 'user' ? "ml-auto flex-row-reverse" : "mr-auto"
-                  )}
-                >
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center shrink-0",
-                    msg.role === 'user' ? "bg-gray-200" : "bg-black text-white"
-                  )}>
-                    {msg.role === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
-                  </div>
-                  <div className={cn(
-                    "p-3 rounded-2xl text-sm leading-relaxed",
-                    msg.role === 'user' 
-                      ? "bg-black text-white rounded-tr-none" 
-                      : "bg-white text-gray-800 shadow-sm border border-gray-100 rounded-tl-none"
-                  )}>
-                    <div className="markdown-body prose prose-sm max-w-none">
-                      <ReactMarkdown>
-                        {msg.content}
-                      </ReactMarkdown>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-              {isLoading && (
-                <div className="flex gap-3 mr-auto max-w-[85%]">
-                  <div className="w-8 h-8 rounded-full bg-black text-white flex items-center justify-center shrink-0">
-                    <Bot className="w-4 h-4" />
-                  </div>
-                  <div className="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm border border-gray-100">
-                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
-                  </div>
-                </div>
+    <div className="flex flex-col h-full bg-white">
+      {/* Messages Area */}
+      <div ref={scrollRef} className="flex-1 overflow-y-auto scroll-smooth px-8 py-10">
+        <div className="max-w-2xl mx-auto space-y-8">
+          {messages.map((msg) => (
+            <motion.div
+              key={msg.id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className={cn(
+                "flex gap-4",
+                msg.role === 'user' ? "flex-row-reverse" : ""
               )}
-            </div>
-
-            {/* Input */}
-            <div className="p-4 bg-white border-t border-gray-100">
-              <div className="relative flex items-center">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                  placeholder="Ask me anything..."
-                  className="w-full pl-4 pr-12 py-3 bg-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-black/5 transition-all"
-                />
-                <button
-                  onClick={handleSend}
-                  disabled={!input.trim() || isLoading}
-                  className="absolute right-2 p-2 bg-black text-white rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:scale-105 active:scale-95 transition-all"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
+            >
+              <div className={cn(
+                "w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 shadow-sm",
+                msg.role === 'user' ? "bg-gray-50 text-gray-400" : "bg-indigo-600 text-white"
+              )}>
+                {msg.role === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
+              </div>
+              <div className={cn(
+                "flex-1 space-y-1",
+                msg.role === 'user' ? "text-right" : ""
+              )}>
+                <div className={cn(
+                  "inline-block p-4 rounded-2xl text-sm leading-relaxed",
+                  msg.role === 'user' 
+                    ? "bg-indigo-600 text-white rounded-tr-none text-left" 
+                    : "bg-gray-50 text-gray-800 rounded-tl-none border border-gray-100"
+                )}>
+                  <div className="markdown-body prose prose-sm max-w-none">
+                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                  </div>
+                </div>
+                <p className="text-[10px] font-bold text-gray-300 uppercase tracking-widest px-1">
+                  {msg.role === 'user' ? 'You' : 'Starebot'} • {msg.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            </motion.div>
+          ))}
+          {isLoading && (
+            <div className="flex gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                <Bot className="w-5 h-5" />
+              </div>
+              <div className="flex-1 space-y-1">
+                <div className="inline-block p-4 rounded-2xl rounded-tl-none bg-gray-50 border border-gray-100">
+                  <div className="flex items-center gap-1">
+                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce" />
+                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.2s]" />
+                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce [animation-delay:0.4s]" />
+                  </div>
+                </div>
               </div>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+          )}
+        </div>
+      </div>
+
+      {/* Input Area */}
+      <div className="p-8 bg-white border-t border-gray-50">
+        <div className="max-w-2xl mx-auto relative">
+          <textarea
+            rows={1}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                handleSend();
+              }
+            }}
+            placeholder="Type your message here..."
+            className="w-full pl-6 pr-16 py-4 bg-gray-50 border border-gray-100 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-indigo-500/5 focus:bg-white focus:border-indigo-200 transition-all resize-none shadow-inner"
+          />
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || isLoading}
+            className={cn(
+              "absolute right-3 top-1/2 -translate-y-1/2 p-2.5 rounded-xl transition-all",
+              input.trim() && !isLoading 
+                ? "bg-indigo-600 text-white hover:scale-105 active:scale-95 shadow-lg shadow-indigo-200" 
+                : "bg-gray-200 text-white cursor-not-allowed"
+            )}
+          >
+            <Send className="w-5 h-5" />
+          </button>
+        </div>
+        <p className="text-center text-[10px] text-gray-400 mt-4 font-medium">
+          Starebot is powered by InsightFlow AI. Always verify critical information.
+        </p>
+      </div>
+    </div>
   );
 }
+

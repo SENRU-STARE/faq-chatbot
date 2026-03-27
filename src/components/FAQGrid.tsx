@@ -4,7 +4,7 @@ import { Search, ChevronDown, ChevronUp, BookOpen, HelpCircle } from 'lucide-rea
 import { FAQ_DATA, CATEGORIES } from '../constants';
 import { cn } from '../lib/utils';
 
-export function FAQGrid() {
+export function FAQGrid({ compact = false }: { compact?: boolean }) {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -15,6 +15,38 @@ export function FAQGrid() {
     const matchesCategory = selectedCategory === 'All' || faq.category === selectedCategory;
     return matchesSearch && matchesCategory;
   });
+
+  if (compact) {
+    return (
+      <div className="space-y-2">
+        {filteredFAQs.slice(0, 5).map((faq) => (
+          <div key={faq.id} className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+            <button
+              onClick={() => setExpandedId(expandedId === faq.id ? null : faq.id)}
+              className="w-full px-4 py-3 flex items-center justify-between text-left group"
+            >
+              <span className="text-xs font-semibold text-gray-700">{faq.question}</span>
+              <ChevronDown className={cn("w-3 h-3 text-gray-400 transition-transform", expandedId === faq.id && "rotate-180")} />
+            </button>
+            <AnimatePresence>
+              {expandedId === faq.id && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  className="overflow-hidden"
+                >
+                  <div className="px-4 pb-3 text-[11px] text-gray-500 leading-relaxed">
+                    {faq.answer}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-12">
